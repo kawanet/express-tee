@@ -7,6 +7,16 @@ interface TeeOptions {
     index?: string; // index.html
 }
 
+type numMap = { [type: string]: number };
+
+const removeHeaders: numMap = {
+    "if-match": 1,
+    "if-modified-since": 1,
+    "if-none-match": 1,
+    "if-unmodified-since": 1,
+    "range": 1,
+};
+
 export function tee(root: string, options?: TeeOptions): express.RequestHandler {
 
     return async (req, res, next) => {
@@ -17,6 +27,9 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
         const _method = req.method;
         const isHEAD = (_method === "HEAD");
         if (isHEAD) req.method = "GET";
+
+        // remove conditional request headers
+        Object.keys(removeHeaders).forEach(key => delete req.headers[key]);
 
         // retrieve a chunk
         res.write = function (chunk: any, encoding?: any, cb?: any) {
