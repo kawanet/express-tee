@@ -28,7 +28,7 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
                 return true;
             }
 
-            return _write.call(res, arguments);
+            return _write.apply(res, arguments);
         };
 
         // retrieve the last chunk
@@ -38,6 +38,12 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
             if (chunk && "function" !== typeof chunk) {
                 buffer.push(chunk);
             }
+
+            buffer.forEach((item: Buffer, idx: number) => {
+                if ("string" === typeof item) {
+                    buffer[idx] = Buffer.from(item);
+                }
+            });
 
             Promise.resolve(Buffer.concat(buffer)).then(writeCache).then(() => {
                 if (isHEAD) return _end.call(res, getCallback(args));
