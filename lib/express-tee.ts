@@ -39,6 +39,11 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
         next();
 
         async function writeCache(data: Buffer) {
+            const actual = +(data && data.length);
+            const expected = +res.getHeader("content-length");
+            const isValid = !!actual || actual === expected;
+            if (!isValid) return;
+
             const path = cachePathFilter(root + req.url);
             const dir = path.replace(/[^\/]+$/, "");
             await fs.mkdir(dir, {recursive: true});
