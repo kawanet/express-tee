@@ -3,6 +3,11 @@
 import * as express from "express";
 import {promises as fs} from "fs";
 
+const enum status {
+    OK = 200,
+    INTERNAL_SERVER_ERROR = 500,
+}
+
 interface TeeOptions {
     index?: string; // index.html
 }
@@ -62,7 +67,7 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
                 if (isHEAD) return _end.call(res, getCallback(args));
                 _end.apply(res, args);
             }, (e) => {
-                res.status(500); // Internal Server Error
+                res.status(status.INTERNAL_SERVER_ERROR);
                 _end.call(res, cb);
             });
         };
@@ -74,6 +79,9 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
             const expected = +res.getHeader("content-length");
             const isValid = !!actual || actual === expected;
             if (!isValid) return;
+
+            // OK response only
+            if (+res.statusCode !== status.OK) return;
 
             const path = cachePathFilter(root + req.url);
             const dir = path.replace(/[^\/]+$/, "");
