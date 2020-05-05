@@ -14,21 +14,33 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
         const _end = res.end;
         const buffer = [] as Buffer[];
 
+        const _method = req.method;
+        const isHEAD = (_method === "HEAD");
+        if (isHEAD) req.method = "GET";
+
         // retrieve a chunk
         res.write = function (chunk: any, encoding?: any, cb?: any) {
             if (chunk != null) buffer.push(chunk);
+
+            if (isHEAD) {
+                cb = getCallback(arguments);
+                if (cb) cb();
+                return true;
+            }
+
             return _write.call(res, arguments);
         };
 
         // retrieve the last chunk
         res.end = function (chunk?: any, encoding?: any, cb?: any) {
             const args = [].slice.call(arguments);
-            if ("function" === typeof chunk) {
-                args.unshift(chunk = null);
+
+            if (chunk && "function" !== typeof chunk) {
+                buffer.push(chunk);
             }
 
-            if (chunk != null) buffer.push(chunk);
             Promise.resolve(Buffer.concat(buffer)).then(writeCache).then(() => {
+                if (isHEAD) return _end.call(res, getCallback(args));
                 _end.apply(res, args);
             }, (e) => {
                 res.status(500); // Internal Server Error
@@ -57,5 +69,10 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
         const index = options && options.index || "index.html";
         if (str.search(/\/$/) > -1) str += index;
         return str;
+    }
+
+    function getCallback(args: IArguments) {
+        const cb = args[args.length - 1];
+        if ("function" === typeof cb) return cb;
     }
 }

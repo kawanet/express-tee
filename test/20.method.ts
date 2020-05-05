@@ -14,19 +14,16 @@ describe(TITLE, () => {
         const path = "/head.html";
         it(path, async () => {
             const agent = getAgent();
-            const HEAD = "1:HEAD";
-            const GET = "3:GET";
+            const body = "1:GET";
+            const length = "" + body.length
 
-            // content not cached by HEAD method
-            await agent.head(path).expect("content-length", "" + HEAD.length);
-            await agent.head(path + "?_=1588635019").expect("content-length", "" + HEAD.length);
+            // content cached even by HEAD method
+            await agent.head(path).expect("content-length", length);
+            await agent.head(path + "?_=1588635019").expect("content-length", length);
 
             // content cached by GET method
-            await agent.get(path).expect("content-length", "" + GET.length).expect(GET);
-            await agent.get(path + "?_=1588635019").expect("content-length", "" + GET.length).expect(GET);
-
-            await agent.head(path).expect("content-length", "" + GET.length);
-            await agent.head(path + "?_=1588635019").expect("content-length", "" + GET.length);
+            await agent.get(path).expect(body).expect("content-length", length);
+            await agent.get(path + "?_=1588635019").expect(body).expect("content-length", length);
         });
     }
 
@@ -34,16 +31,18 @@ describe(TITLE, () => {
         const path = "/post.html";
         it(path, async () => {
             const agent = getAgent();
-            const POST1 = "1:POST";
-            const POST2 = "2:POST";
+            const body1 = "1:POST";
+            const length1 = "" + body1.length;
+            const body2 = "2:POST";
+            const length2 = "" + body2.length;
 
             // content cached by POST method
-            await agent.post(path).expect("content-length", "" + POST1.length).expect(POST1);
-            await agent.get(path).expect("content-length", "" + POST1.length).expect(POST1);
+            await agent.post(path).expect(body1).expect("content-length", length1);
+            await agent.get(path).expect(body1).expect("content-length", length1);
 
             // content overridden by POST method as express.static() passes it
-            await agent.post(path).expect("content-length", "" + POST2.length).expect(POST2);
-            await agent.get(path).expect("content-length", "" + POST2.length).expect(POST2);
+            await agent.post(path).expect(body2).expect("content-length", length2);
+            await agent.get(path).expect(body2).expect("content-length", length2);
         });
     }
 });
