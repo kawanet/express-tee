@@ -1,0 +1,40 @@
+{
+  "name": "express-tee",
+  "description": "Express middleware to cache contents on file system",
+  "version": "0.1.0",
+  "author": "Yusuke Kawasaki <u-suke@kawa.net>",
+  "contributors": [
+    "Yusuke Kawasaki <u-suke@kawa.net>"
+  ],
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.13.4",
+    "@types/supertest": "^2.0.9",
+    "express": "^4.17.1",
+    "mocha": "^7.1.2",
+    "supertest": "^4.0.2",
+    "typescript": "^3.8.3"
+  },
+  "homepage": "https://github.com/kawanet/express-tee#readme",
+  "keywords": [
+    "expressjs",
+    "middleware",
+    "tee",
+    "dump",
+    "mirror"
+  ],
+  "license": "MIT",
+  "main": "lib/express-tee.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kawanet/express-tee.git"
+  },
+  "scripts": {
+    "fixpack": "fixpack",
+    "test": "rm -fr test/tmp && ./node_modules/.bin/mocha -R spec test/*.js",
+    "tsc": "tsc -p . && tsc -p types",
+    "tsc-watch": "tsc --watch"
+  },
+  "typings": "./types/express-tee.d.ts"
+}
