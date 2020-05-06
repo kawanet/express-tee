@@ -12,6 +12,7 @@ const enum status {
 
 export interface TeeOptions {
     index?: string; // index.html
+    logger?: { log: (message: string) => void };
 }
 
 type numMap = { [type: string]: number };
@@ -31,6 +32,7 @@ const decoders = {
 } as { [encoding: string]: decoderFn };
 
 export function tee(root: string, options?: TeeOptions): express.RequestHandler {
+    if (!options) options = {} as TeeOptions;
 
     return async (req, res, next) => {
         const _write = res.write;
@@ -95,6 +97,8 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
             data = await uncompressBody(res, data);
 
             const path = cachePathFilter(root + req.url);
+            if (options.logger) options.logger.log(path);
+
             const dir = path.replace(/[^\/]+$/, "");
             await fs.mkdir(dir, {recursive: true});
             await fs.writeFile(path, data);
