@@ -1,6 +1,5 @@
 import * as express from "express";
-interface TeeOptions {
+export interface TeeOptions {
     index?: string;
 }
 export declare function tee(root: string, options?: TeeOptions): express.RequestHandler;
-export {};

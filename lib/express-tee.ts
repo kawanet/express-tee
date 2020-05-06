@@ -1,18 +1,21 @@
 // express-tee.ts
 
 import * as express from "express";
+import {gunzip, inflate} from "zlib";
 import {promises as fs} from "fs";
+import {promisify} from "util";
 
 const enum status {
     OK = 200,
     INTERNAL_SERVER_ERROR = 500,
 }
 
-interface TeeOptions {
+export interface TeeOptions {
     index?: string; // index.html
 }
 
 type numMap = { [type: string]: number };
+type decoderFn = (buffer: Buffer) => Promise<Buffer>;
 
 const removeHeaders: numMap = {
     "if-match": 1,
@@ -21,6 +24,11 @@ const removeHeaders: numMap = {
     "if-unmodified-since": 1,
     "range": 1,
 };
+
+const decoders = {
+    gzip: promisify(gunzip),
+    deflate: promisify(inflate),
+} as { [encoding: string]: decoderFn };
 
 export function tee(root: string, options?: TeeOptions): express.RequestHandler {
 
@@ -83,6 +91,9 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
             // OK response only
             if (+res.statusCode !== status.OK) return;
 
+            // uncompress Buffer
+            data = await uncompressBody(res, data);
+
             const path = cachePathFilter(root + req.url);
             const dir = path.replace(/[^\/]+$/, "");
             await fs.mkdir(dir, {recursive: true});
@@ -101,5 +112,19 @@ export function tee(root: string, options?: TeeOptions): express.RequestHandler 
     function getCallback(args: IArguments) {
         const cb = args[args.length - 1];
         if ("function" === typeof cb) return cb;
+    }
+
+    async function uncompressBody(res: express.Response, buffer: Buffer): Promise<Buffer> {
+        const contentEncoding = res.getHeader("content-encoding") as string;
+        const transferEncoding = res.getHeader("transfer-encoding") as string;
+        const decoder = decoders[contentEncoding] || decoders[transferEncoding];
+
+        if (decoder && buffer.length) {
+            buffer = await decoder(buffer);
+            res.removeHeader("content-encoding");
+            res.removeHeader("transfer-encoding");
+        }
+
+        return buffer;
     }
 }
