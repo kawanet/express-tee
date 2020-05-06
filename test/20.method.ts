@@ -11,7 +11,7 @@ const cachePrefix = __dirname + "/tmp/cache-" + Math.floor(+new Date() / 1000);
 
 describe(TITLE, () => {
     {
-        const path = "/head.html";
+        const path = "/head/";
         it(path, async () => {
             const agent = getAgent();
             const body = "1:GET";
@@ -28,7 +28,7 @@ describe(TITLE, () => {
     }
 
     {
-        const path = "/post.html";
+        const path = "/post/";
         it(path, async () => {
             const agent = getAgent();
             const body1 = "1:POST";
@@ -51,7 +51,7 @@ function getAgent() {
     const app = express();
     // app.use((req, res, next) => +console.warn(req.url) | +next());
     app.use(express.static(cachePrefix));
-    app.use(tee(cachePrefix));
+    app.use(tee(cachePrefix, {method: /HEAD|GET|POST/}));
     app.use(echoMW());
     return request(app);
 }

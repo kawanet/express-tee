@@ -6,7 +6,7 @@ T-splitter to mirror Express.js response
 
 ```js
 const express = require("express");
-const tee = require("express-tee");
+const tee = require("express-tee").tee;
 const app = express();
 
 // response previous response if available

@@ -1,134 +1,91 @@
 // express-tee.ts
 
-import * as express from "express";
-import {gunzip, inflate} from "zlib";
 import {promises as fs} from "fs";
-import {promisify} from "util";
+import {Request, RequestHandler, Response} from "express";
 
-const enum status {
-    OK = 200,
-    INTERNAL_SERVER_ERROR = 500,
-}
+import {requestHandler, responseHandler} from "express-intercept";
+
+type Tester = { test: (str: any) => boolean };
 
 export interface TeeOptions {
-    index?: string; // index.html
+    /// index.html
+    index?: string;
+
+    /// console.log
     logger?: { log: (message: string) => void };
+
+    /// HTTP request method: regexp or forward match string
+    method?: RegExp | string;
+
+    /// HTTP response status code: regexp or forward match string
+    statusCode?: RegExp | string;
 }
 
-type numMap = { [type: string]: number };
-type decoderFn = (buffer: Buffer) => Promise<Buffer>;
+const defaults: TeeOptions = {
+    // exclude HEAD method per default
+    method: /^(?!HEAD)/,
 
-const removeHeaders: numMap = {
-    "if-match": 1,
-    "if-modified-since": 1,
-    "if-none-match": 1,
-    "if-unmodified-since": 1,
-    "range": 1,
+    // OK response only per default
+    statusCode: "200",
 };
 
-const decoders = {
-    gzip: promisify(gunzip),
-    deflate: promisify(inflate),
-} as { [encoding: string]: decoderFn };
+const makeTester = (cond: RegExp | string): Tester => !cond ? {test: () => true} : (cond as RegExp).test ? (cond as RegExp) : {test: str => !String(str).indexOf(cond as string)};
 
-export function tee(root: string, options?: TeeOptions): express.RequestHandler {
+const pseudoHEAD = requestHandler()
+    .for(req => req.method === "HEAD") // only for HEAD
+    .use(
+        requestHandler().getRequest(req => req.method = "GET"), // set GET
+        responseHandler().getRequest(req => req.method = "HEAD") // revert to HEAD
+    );
+
+export function tee(root: string, options?: TeeOptions): RequestHandler {
     if (!options) options = {} as TeeOptions;
 
-    return async (req, res, next) => {
-        const _write = res.write;
-        const _end = res.end;
-        const buffer = [] as Buffer[];
+    const method = makeTester(options.method || defaults.method);
 
-        const _method = req.method;
-        const isHEAD = (_method === "HEAD");
-        if (isHEAD) req.method = "GET";
+    const statusCode = makeTester(options.statusCode || defaults.statusCode);
 
-        // remove conditional request headers
-        Object.keys(removeHeaders).forEach(key => delete req.headers[key]);
+    return requestHandler()
+        .for(req => method.test(req.method))
+        .use(
+            pseudoHEAD,
+            responseHandler().getBuffer(teeToFile),
+        );
 
-        // retrieve a chunk
-        res.write = function (chunk: any, encoding?: any, cb?: any) {
-            if (chunk != null) buffer.push(chunk);
+    async function teeToFile(data: Buffer, req: Request, res: Response) {
+        // if (+res.statusCode === 200) return;
+        if (!statusCode.test(res.statusCode)) return;
 
-            if (isHEAD) {
-                cb = getCallback(arguments);
-                if (cb) cb();
-                return true;
-            }
+        // ignore when Range: specified
+        if (res.getHeader("content-range")) return;
 
-            return _write.apply(res, arguments);
-        };
+        // file path
+        const path = getPath();
+        if (options.logger) options.logger.log(path);
 
-        // retrieve the last chunk
-        res.end = function (chunk?: any, encoding?: any, cb?: any) {
-            const args = [].slice.call(arguments);
+        // prepare directory
+        const dir = path.replace(/[^\/]+$/, "");
+        await fs.mkdir(dir, {recursive: true});
 
-            if (chunk && "function" !== typeof chunk) {
-                buffer.push(chunk);
-            }
+        // write file
+        await fs.writeFile(path, data);
 
-            buffer.forEach((item: Buffer, idx: number) => {
-                if ("string" === typeof item) {
-                    buffer[idx] = Buffer.from(item);
-                }
-            });
-
-            Promise.resolve(Buffer.concat(buffer)).then(writeCache).then(() => {
-                if (isHEAD) return _end.call(res, getCallback(args));
-                _end.apply(res, args);
-            }, (e) => {
-                res.status(status.INTERNAL_SERVER_ERROR);
-                _end.call(res, cb);
-            });
-        };
-
-        next();
-
-        async function writeCache(data: Buffer) {
-            const actual = +(data && data.length);
-            const expected = +res.getHeader("content-length");
-            const isValid = !!actual || actual === expected;
-            if (!isValid) return;
-
-            // OK response only
-            if (+res.statusCode !== status.OK) return;
-
-            // uncompress Buffer
-            data = await uncompressBody(res, data);
-
-            const path = cachePathFilter(root + req.url);
-            if (options.logger) options.logger.log(path);
-
-            const dir = path.replace(/[^\/]+$/, "");
-            await fs.mkdir(dir, {recursive: true});
-            await fs.writeFile(path, data);
-        }
-    }
-
-    function cachePathFilter(str: string) {
-        str = str.replace(/(\/[^\/]+)?\/\.\.\//, "");
-        str = str.replace(/[?#].*$/, "");
-        const index = options && options.index || "index.html";
-        if (str.search(/\/$/) > -1) str += index;
-        return str;
-    }
-
-    function getCallback(args: IArguments) {
-        const cb = args[args.length - 1];
-        if ("function" === typeof cb) return cb;
-    }
-
-    async function uncompressBody(res: express.Response, buffer: Buffer): Promise<Buffer> {
-        const contentEncoding = res.getHeader("content-encoding") as string;
-        const transferEncoding = res.getHeader("transfer-encoding") as string;
-        const decoder = decoders[contentEncoding] || decoders[transferEncoding];
-
-        if (decoder && buffer.length) {
-            buffer = await decoder(buffer);
-            res.removeHeader("content-encoding");
-            res.removeHeader("transfer-encoding");
+        function getPath() {
+            const url = req.originalUrl || req.url || req.path;
+            let str = root + url;
+            str = str.replace(/(\/[^\/]+)?\/\.\.\//g, "");
+            str = str.replace(/[?#].*$/, "");
+            if (str.search(/\/$/) > -1) str += getIndex();
+            return str;
         }
 
-        return buffer;
+        function getIndex() {
+            return options && options.index || ("index." + getType());
+        }
+
+        function getType() {
+            const type = "" + res.getHeader("content-type");
+            return type.split(/[\/\s;]+/)[1] || "html";
+        }
     }
 }

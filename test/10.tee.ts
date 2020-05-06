@@ -18,7 +18,7 @@ describe(TITLE, () => {
             const res = await agent.get(path);
             const expected = "1:/foo.html";
             assert.equal(res.text, expected);
-            assert.equal(res.header["content-type"]?.toLowerCase(), "text/html; charset=utf-8");
+            assert.equal(String(res.header["content-type"]).toLowerCase(), "text/html; charset=utf-8");
 
             // confirm cached
             await agent.get(path).expect(expected);
@@ -33,7 +33,7 @@ describe(TITLE, () => {
             const res = await agent.get(path);
             const expected = "1:/foo/";
             assert.equal(res.text, expected);
-            assert.equal(res.header["content-type"]?.toLowerCase(), "text/html; charset=utf-8");
+            assert.equal(String(res.header["content-type"]).toLowerCase(), "text/html; charset=utf-8");
 
             // confirm cached
             await agent.get(path).expect(expected);
@@ -48,7 +48,7 @@ describe(TITLE, () => {
             const res = await agent.get(path);
             const expected = "1:/bar.html?_=1588635019";
             assert.equal(res.text, expected);
-            assert.equal(res.header["content-type"]?.toLowerCase(), "text/html; charset=utf-8");
+            assert.equal(String(res.header["content-type"]).toLowerCase(), "text/html; charset=utf-8");
 
             // confirm cached
             await agent.get(path.replace(/\d+/, match => (+match + 1) + "")).expect(expected);
