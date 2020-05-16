@@ -1,11 +1,8 @@
 // express-tee.ts
 
-import {promises as fs} from "fs";
 import {Request, RequestHandler, Response} from "express";
-
 import {requestHandler, responseHandler} from "express-intercept";
-
-type Tester = { test: (str: any) => boolean };
+import {promises as fs} from "fs";
 
 export interface TeeOptions {
     /// index.html
@@ -15,10 +12,10 @@ export interface TeeOptions {
     logger?: { log: (message: string) => void };
 
     /// HTTP request method: regexp or forward match string
-    method?: RegExp | Tester;
+    method?: RegExp | { test: (str: string) => boolean };
 
     /// HTTP response status code: regexp or forward match string
-    statusCode?: RegExp | Tester;
+    statusCode?: RegExp | { test: (str: string) => boolean };
 }
 
 const defaults: TeeOptions = {
@@ -52,7 +49,7 @@ export function tee(root: string, options?: TeeOptions): RequestHandler {
 
     async function teeToFile(data: Buffer, req: Request, res: Response) {
         // if (+res.statusCode === 200) return;
-        if (!statusCode.test(res.statusCode)) return;
+        if (!statusCode.test(String(res.statusCode))) return;
 
         // ignore when Range: specified
         if (res.getHeader("content-range")) return;
