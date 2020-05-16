@@ -40,6 +40,9 @@ export function tee(root: string, options?: TeeOptions): RequestHandler {
 
     const statusCode = options.statusCode || defaults.statusCode;
 
+    // trailing slash
+    root = root.replace(/\/+$/, "");
+
     return requestHandler()
         .for(req => method.test(req.method))
         .use(
@@ -66,12 +69,17 @@ export function tee(root: string, options?: TeeOptions): RequestHandler {
         await fs.writeFile(path, data);
 
         function getPath() {
-            const url = req.originalUrl || req.url || req.path;
-            let str = root + url;
-            str = str.replace(/(\/[^\/]+)?\/\.\.\//g, "");
+            let str = req.originalUrl || req.url || req.path;
+            while (1) {
+                let prev = str;
+                str = str.replace(/\/\.\//g, "/");
+                str = str.replace(/(\/[^\/]+)?\/\.\.\//g, "/");
+                if (prev === str) break;
+            }
             str = str.replace(/[?#].*$/, "");
             if (str.search(/\/$/) > -1) str += getIndex();
-            return str;
+            str = str.replace(/^\/+/, "");
+            return root + "/" + str;
         }
 
         function getIndex() {
