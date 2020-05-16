@@ -25,6 +25,10 @@ app.use((req, res) => {
 app.listen(3000);
 ```
 
+See TypeScript declaration
+[express-tee.d.ts](https://github.com/kawanet/express-tee/blob/master/types/express-tee.d.ts)
+for more detail.
+
 ## SEE ALSO
 
 - https://github.com/kawanet/express-intercept
