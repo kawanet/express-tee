@@ -2,6 +2,9 @@
 
 T-splitter to mirror Express.js response
 
+![Node.js CI](https://github.com/kawanet/express-tee/workflows/Node.js%20CI/badge.svg?branch=master)
+[![npm version](https://badge.fury.io/js/express-tee.svg)](https://www.npmjs.com/package/express-tee)
+
 ## SYNOPSIS
 
 ```js
@@ -12,7 +15,7 @@ const app = express();
 // response previous response if available
 app.use(express.static("cache"));
 
-// dump response body to static file
+// dump response body to local cache directory
 app.use(tee("cache"));
 
 app.use((req, res) => {
@@ -21,6 +24,10 @@ app.use((req, res) => {
 
 app.listen(3000);
 ```
+
+## SEE ALSO
+
+- https://github.com/kawanet/express-intercept
 
 ## LICENSE
 
