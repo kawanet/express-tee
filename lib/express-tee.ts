@@ -15,10 +15,10 @@ export interface TeeOptions {
     logger?: { log: (message: string) => void };
 
     /// HTTP request method: regexp or forward match string
-    method?: RegExp | string;
+    method?: RegExp | Tester;
 
     /// HTTP response status code: regexp or forward match string
-    statusCode?: RegExp | string;
+    statusCode?: RegExp | Tester;
 }
 
 const defaults: TeeOptions = {
@@ -26,10 +26,8 @@ const defaults: TeeOptions = {
     method: /^(?!HEAD)/,
 
     // OK response only per default
-    statusCode: "200",
+    statusCode: /^(200)$/,
 };
-
-const makeTester = (cond: RegExp | string): Tester => !cond ? {test: () => true} : (cond as RegExp).test ? (cond as RegExp) : {test: str => !String(str).indexOf(cond as string)};
 
 const pseudoHEAD = requestHandler()
     .for(req => req.method === "HEAD") // only for HEAD
@@ -41,9 +39,9 @@ const pseudoHEAD = requestHandler()
 export function tee(root: string, options?: TeeOptions): RequestHandler {
     if (!options) options = {} as TeeOptions;
 
-    const method = makeTester(options.method || defaults.method);
+    const method = options.method || defaults.method;
 
-    const statusCode = makeTester(options.statusCode || defaults.statusCode);
+    const statusCode = options.statusCode || defaults.statusCode;
 
     return requestHandler()
         .for(req => method.test(req.method))
