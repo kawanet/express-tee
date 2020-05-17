@@ -69,14 +69,23 @@ export function tee(root: string, options?: TeeOptions): RequestHandler {
         await fs.writeFile(path, data);
 
         function getPath() {
-            let str = req.originalUrl || req.url || req.path;
+            let str = req.url || req.path;
+
+            str = str.replace(/[?#].*$/, "");
+
+            // decode %25 => %
+            // same as `express.static()` does `decodeURIComponent(path)` in `send` module
+            // https://github.com/pillarjs/send/blob/master/index.js
+            str = decodeURIComponent(str);
+
+            // upper directory
             while (1) {
                 let prev = str;
                 str = str.replace(/\/\.\//g, "/");
                 str = str.replace(/(\/[^\/]+)?\/\.\.\//g, "/");
                 if (prev === str) break;
             }
-            str = str.replace(/[?#].*$/, "");
+
             if (str.search(/\/$/) > -1) str += getIndex();
             str = str.replace(/^\/+/, "");
             return root + "/" + str;

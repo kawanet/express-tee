@@ -55,6 +55,18 @@ describe(TITLE, () => {
             await agent.get(path.replace(/\d+/, match => (+match + 2) + "")).expect(expected);
         });
     }
+
+    {
+        const path = "/%25.html";
+        it(path, async () => {
+            const agent = getAgent();
+            const expected = "1:/%25.html";
+            await agent.get(path).expect(res => assert.equal(res.text, expected));
+
+            // confirm cached
+            await agent.get(path).expect(res => assert.equal(res.text, expected));
+        });
+    }
 });
 
 function getAgent() {

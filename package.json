@@ -1,7 +1,7 @@
 {
   "name": "express-tee",
   "description": "Express middleware to cache contents on file system",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "author": "Yusuke Kawasaki <u-suke@kawa.net>",
   "contributors": [
     "Yusuke Kawasaki <u-suke@kawa.net>"
@@ -45,7 +45,7 @@
     "build-types": "./node_modules/.bin/tsc -p types",
     "fixpack": "fixpack",
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
-    "test": "npm run mocha",
+    "test": "/bin/rm -fr test/tmp && npm run mocha",
     "tsc-watch": "tsc --watch"
   },
   "typings": "./types/express-tee.d.ts"
