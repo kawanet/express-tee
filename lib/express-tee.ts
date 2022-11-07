@@ -1,22 +1,12 @@
 // express-tee.ts
 
-import {Request, RequestHandler, Response} from "express";
+import type {Request, Response} from "express";
 import {requestHandler, responseHandler} from "express-intercept";
 import {promises as fs} from "fs";
+import type * as types from "../types/express-tee";
 
-export interface TeeOptions {
-    /// index.html
-    index?: string;
-
-    /// console.log
-    logger?: { log: (message: string) => void };
-
-    /// HTTP request method: regexp or forward match string
-    method?: RegExp | { test: (str: string) => boolean };
-
-    /// HTTP response status code: regexp or forward match string
-    statusCode?: RegExp | { test: (str: string) => boolean };
-}
+type TeeOptions = types.TeeOptions;
+type tee = typeof types.tee;
 
 const defaults: TeeOptions = {
     // exclude HEAD method per default
@@ -33,8 +23,8 @@ const pseudoHEAD = requestHandler()
         responseHandler().getRequest(req => req.method = "HEAD") // revert to HEAD
     );
 
-export function tee(root: string, options?: TeeOptions): RequestHandler {
-    if (!options) options = {} as TeeOptions;
+export const tee: tee = (root, options) => {
+    if (!options) options = {} as types.TeeOptions;
 
     const method = options.method || defaults.method;
 
