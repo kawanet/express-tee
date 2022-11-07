@@ -3,7 +3,7 @@
 import * as express from "express";
 import * as request from "supertest";
 
-import {tee} from "../lib/express-tee";
+import {tee} from "../";
 
 const TITLE = __filename.split("/").pop();
 

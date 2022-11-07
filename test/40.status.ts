@@ -3,7 +3,7 @@
 import * as express from "express";
 import * as request from "supertest";
 
-import {tee} from "../lib/express-tee";
+import {tee} from "../";
 
 const TITLE = __filename.split("/").pop();
 
@@ -50,7 +50,7 @@ function sampleAPI(): express.RequestHandler {
     return (req, res, next) => {
         cnt++;
         const {status} = req.params as any;
-        res.status(status).type("html");
+        res.status(+status).type("html");
         res.header({"X-Count": "" + cnt});
 
         const body = cnt + ":" + req.path;
