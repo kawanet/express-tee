@@ -59,7 +59,7 @@ export const tee: tee = (root, options) => {
         await fs.writeFile(path, data);
 
         function getPath() {
-            let str = req.url || req.path;
+            let str = req.originalUrl || req.url || req.path;
 
             str = str.replace(/[?#].*$/, "");
 
