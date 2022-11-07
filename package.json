@@ -22,8 +22,8 @@
   "files": [
     "LICENSE",
     "README.md",
-    "lib/",
-    "types/express-tee.d.ts"
+    "lib/*.js",
+    "types/*.d.ts"
   ],
   "homepage": "https://github.com/kawanet/express-tee#readme",
   "keywords": [
@@ -45,6 +45,7 @@
     "build-types": "./node_modules/.bin/tsc -p types",
     "fixpack": "fixpack",
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
+    "prepack": "npm run build && npm test",
     "test": "/bin/rm -fr test/tmp && npm run mocha",
     "tsc-watch": "tsc --watch"
   },
