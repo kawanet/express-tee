@@ -1,16 +1,15 @@
 #!/usr/bin/env mocha -R spec
 
-import * as express from "express";
-import * as request from "supertest";
+import {strict as assert} from "assert";
+import express from "express";
+import * as os from "node:os";
+import request from "supertest";
 
 import {tee} from "../";
-import {strict as assert} from "assert";
 
-const TITLE = __filename.split("/").pop();
+const cachePrefix = os.tmpdir() + "/express-tee-" + process.pid;
 
-const cachePrefix = __dirname + "/tmp/cache-" + Math.floor(+new Date() / 1000);
-
-describe(TITLE, () => {
+describe("50.sub-path.ts", () => {
     const agent = getAgent();
 
     const addTest = (path: string, expected: string) => {
