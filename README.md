@@ -8,8 +8,9 @@ T-splitter to mirror Express.js response
 ## SYNOPSIS
 
 ```js
-const express = require("express");
-const tee = require("express-tee").tee;
+import express from "express";
+import {tee} from "express-tee";
+
 const app = express();
 
 // response previous response if available

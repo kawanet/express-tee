@@ -19,9 +19,15 @@
     "supertest": "^7.0.0",
     "typescript": "^5.7.2"
   },
+  "exports": {
+    "import": "./esm/express-tee.mjs",
+    "require": "./lib/express-tee.js",
+    "types": "./types/express-tee.d.ts"
+  },
   "files": [
     "LICENSE",
     "README.md",
+    "esm/*.mjs",
     "lib/*.js",
     "types/*.d.ts"
   ],
@@ -40,12 +46,11 @@
     "url": "git+https://github.com/kawanet/express-tee.git"
   },
   "scripts": {
-    "build": "./node_modules/.bin/tsc -p .",
+    "build": "make",
     "fixpack": "fixpack",
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
     "prepack": "npm run build && npm test",
-    "test": "/bin/rm -fr test/tmp && npm run mocha",
-    "tsc-watch": "tsc --watch"
+    "test": "/bin/rm -fr test/tmp && npm run mocha"
   },
   "typings": "./types/express-tee.d.ts"
 }
