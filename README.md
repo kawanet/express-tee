@@ -2,6 +2,8 @@
 
 T-splitter to mirror Express.js response
 
+Works with Express 4 and 5.
+
 [![Node.js CI](https://github.com/kawanet/express-tee/workflows/Node.js%20CI/badge.svg?branch=master)](https://github.com/kawanet/express-tee/actions/)
 [![npm version](https://badge.fury.io/js/express-tee.svg)](https://www.npmjs.com/package/express-tee)
 
@@ -39,7 +41,7 @@ for more detail.
 
 The MIT License (MIT)
 
-Copyright (c) 2020-2024 Yusuke Kawasaki
+Copyright (c) 2020-2026 Yusuke Kawasaki
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
