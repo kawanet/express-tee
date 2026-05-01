@@ -1,4 +1,4 @@
-// Express 5 系列での結合テスト
+// Integration tests for the Express 5 line.
 
 import express from "express5";
 import {registerSharedTests} from "./lib/shared.ts";

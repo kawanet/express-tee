@@ -1,4 +1,4 @@
-// shared.ts —— Express 4 / Express 5 を切り替えて回す共通テストロジック
+// shared.ts — common test logic run against both Express 4 and Express 5.
 
 import {strict as assert} from "node:assert";
 import {describe, it, before, after} from "node:test";
@@ -8,21 +8,23 @@ import request from "supertest";
 
 import {tee} from "../../lib/express-tee.ts";
 
-// Express 4/5 双方の最小限の型を満たすラッパ。`express()` 関数として使えれば良い。
+// Wrapper that matches the minimal shape of both Express 4 and 5; only
+// needs to be callable as `express()`.
 type ExpressFactory = any;
 
-// 各バージョンごとに異なる pid 由来のキャッシュ prefix を使い、テスト実行間で衝突しないようにする
+// Use a pid- and label-derived cache prefix so concurrent test runs and
+// the two Express versions never collide on the same tmp directory.
 const cachePrefix = (suffix: string) =>
     `${os.tmpdir()}/express-tee-${process.pid}-${suffix}`;
 
 /**
- * テスト本体を Express バージョンごとにまとめて登録する。
- * label には "express4" / "express5" などを渡す。
+ * Registers the full set of test cases for one Express version.
+ * Pass "express4" / "express5" etc. as `label`.
  */
 export function registerSharedTests(label: string, express: ExpressFactory): void {
     const prefix = cachePrefix(label);
 
-    // テスト前後で tmp ディレクトリを掃除
+    // Clean the tmp directory before and after the suite.
     before(async () => {
         await fs.rm(prefix, {recursive: true, force: true});
     });
