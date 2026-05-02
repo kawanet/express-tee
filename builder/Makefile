@@ -59,10 +59,12 @@ test: all smoke $(TYPES)
 	@node -v | grep -q "^v20" || [ "$$npm_command" = "install" ] || $(MAKE) test-ts
 
 # Actual test commands requiring Node.js 22+.
-# Clean test/tmp before each run since the tee middleware writes files there.
+# Note: each test topic registers its own before/after cleanup hook against
+# its os.tmpdir() cache prefix (see test/lib/util.ts), so no Makefile-level
+# tmp purge is needed.
 test-ts:
 	../node_modules/.bin/tsc --noEmit
-	cd .. && /bin/rm -fr test/tmp && node --test test/*.test.ts
+	cd .. && node --test test/*.test.ts
 
 clean:
 	/bin/rm -fr $(ALL)
