@@ -1,34 +1,57 @@
 {
   "name": "express-tee",
   "description": "Express middleware to cache contents on file system",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "author": "Yusuke Kawasaki <u-suke@kawa.net>",
+  "bugs": {
+    "url": "https://github.com/kawanet/express-tee/issues"
+  },
   "contributors": [
     "Yusuke Kawasaki <u-suke@kawa.net>"
   ],
   "dependencies": {
-    "express-intercept": "^1.1.1"
+    "express-intercept": "^1.2.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.14",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "^22.10.0",
+    "@rollup/plugin-node-resolve": "^16.0.2",
+    "@rollup/plugin-sucrase": "^5.0.2",
+    "@types/express": "^4.17.17",
+    "@types/express4": "npm:@types/express@^4",
+    "@types/express5": "npm:@types/express@^5",
+    "@types/node": "^24.0.0",
     "@types/supertest": "^6.0.2",
     "express": "^4.21.1",
-    "mocha": "^10.8.2",
+    "express4": "npm:express@^4",
+    "express5": "npm:express@^5",
+    "rollup": "^4.52.4",
     "supertest": "^7.0.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=22",
+      "onFail": "warn"
+    }
+  },
+  "engines": {
+    "node": ">=20"
   },
   "exports": {
-    "import": "./esm/express-tee.mjs",
-    "require": "./lib/express-tee.js",
-    "types": "./types/express-tee.d.ts"
+    ".": {
+      "require": "./dist/express-tee.cjs",
+      "import": {
+        "types": "./types/express-tee.d.ts",
+        "default": "./dist/express-tee.mjs"
+      }
+    }
   },
   "files": [
     "LICENSE",
     "README.md",
-    "esm/*.mjs",
-    "lib/*.js",
+    "dist/express-tee.cjs",
+    "dist/express-tee.mjs",
+    "lib/*.ts",
     "types/*.d.ts"
   ],
   "homepage": "https://github.com/kawanet/express-tee#readme",
@@ -40,17 +63,19 @@
     "tee"
   ],
   "license": "MIT",
-  "main": "lib/express-tee.js",
+  "main": "./dist/express-tee.cjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kawanet/express-tee.git"
   },
   "scripts": {
-    "build": "make",
+    "build": "make -C builder",
     "fixpack": "fixpack",
-    "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
-    "prepack": "npm run build && npm test",
-    "test": "/bin/rm -fr test/tmp && npm run mocha"
+    "prepack": "if node -v | grep -q '^v20'; then echo 'ERROR: packing is not allowed on Node 20'; exit 1; fi",
+    "prepare": "if node -v | grep -q '^v20'; then :; else make -C builder clean all test; fi",
+    "test": "make -C builder test"
   },
-  "typings": "./types/express-tee.d.ts"
+  "sideEffects": false,
+  "type": "module",
+  "types": "types/express-tee.d.ts"
 }
