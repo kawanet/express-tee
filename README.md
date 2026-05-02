@@ -1,11 +1,11 @@
 # express-tee
 
+[![Node.js CI](https://github.com/kawanet/express-tee/workflows/Node.js%20CI/badge.svg?branch=master)](https://github.com/kawanet/express-tee/actions/)
+[![npm version](https://badge.fury.io/js/express-tee.svg)](https://www.npmjs.com/package/express-tee)
+
 T-splitter to mirror Express.js response
 
 Works with Express 4 and 5.
-
-[![Node.js CI](https://github.com/kawanet/express-tee/workflows/Node.js%20CI/badge.svg?branch=master)](https://github.com/kawanet/express-tee/actions/)
-[![npm version](https://badge.fury.io/js/express-tee.svg)](https://www.npmjs.com/package/express-tee)
 
 ## SYNOPSIS
 
