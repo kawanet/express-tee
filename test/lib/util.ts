@@ -9,7 +9,7 @@ import {promises as fs} from "node:fs";
 // reach for. Express ships as a CommonJS `export = e` namespace, so
 // `typeof import("express")` resolves to the value of `import express
 // from "express"` directly (no `.default`).
-export type ExpressFactory = typeof import("express");
+export type ExpressModule = typeof import("express");
 
 // Use a pid- and label-derived cache prefix so concurrent test runs and
 // the two Express versions never collide on the same tmp directory.

@@ -5,9 +5,9 @@ import {describe, it} from "node:test";
 import request from "supertest";
 
 import {tee} from "../../lib/express-tee.ts";
-import {cachePrefix, registerCleanup, type ExpressFactory} from "./util.ts";
+import {cachePrefix, registerCleanup, type ExpressModule} from "./util.ts";
 
-export function runTeeTests(label: string, express: ExpressFactory): void {
+export function runTeeTests(label: string, express: ExpressModule): void {
     const prefix = cachePrefix(`${label}-tee`);
     registerCleanup(prefix);
 
