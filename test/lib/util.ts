@@ -4,9 +4,12 @@ import {before, after} from "node:test";
 import * as os from "node:os";
 import {promises as fs} from "node:fs";
 
-// Wrapper that matches the minimal shape of both Express 4 and 5; only
-// needs to be callable as `express()`.
-export type ExpressFactory = any;
+// Express factory shape that includes both the call signature and the
+// namespace methods (`.static`, `.Router`, `.json`, ...) the runners
+// reach for. Express ships as a CommonJS `export = e` namespace, so
+// `typeof import("express")` resolves to the value of `import express
+// from "express"` directly (no `.default`).
+export type ExpressFactory = typeof import("express");
 
 // Use a pid- and label-derived cache prefix so concurrent test runs and
 // the two Express versions never collide on the same tmp directory.
