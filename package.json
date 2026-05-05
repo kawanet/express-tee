@@ -39,11 +39,9 @@
   },
   "exports": {
     ".": {
+      "types": "./types/express-tee.d.ts",
       "require": "./dist/express-tee.cjs",
-      "import": {
-        "types": "./types/express-tee.d.ts",
-        "default": "./dist/express-tee.mjs"
-      }
+      "import": "./dist/express-tee.mjs"
     }
   },
   "files": [
