@@ -1,5 +1,7 @@
 import type {RequestHandler} from "express";
 
+export {} // external module indicator
+
 export declare interface TeeOptions {
     /// index.html
     index?: string;
