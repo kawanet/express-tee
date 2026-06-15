@@ -1,7 +1,6 @@
 // Integration tests for the Express 5 line.
 
 import express5 from "express5"
-
 import {runChunkedTests} from "./lib/chunked.ts"
 import {runMethodTests} from "./lib/method.ts"
 import {runStatusTests} from "./lib/status.ts"

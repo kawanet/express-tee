@@ -1,7 +1,6 @@
 // Integration tests for the Express 4 line.
 
 import express from "express4"
-
 import {runChunkedTests} from "./lib/chunked.ts"
 import {runMethodTests} from "./lib/method.ts"
 import {runStatusTests} from "./lib/status.ts"

@@ -3,7 +3,6 @@
 import {strict as assert} from "node:assert"
 import {describe, it} from "node:test"
 import request from "supertest"
-
 import {tee} from "../../lib/express-tee.ts"
 import {cachePrefix, registerCleanup, type ExpressModule} from "./util.ts"
 
