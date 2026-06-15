@@ -2,8 +2,8 @@
 
 import type {Request, Response} from "express"
 import {requestHandler, responseHandler} from "express-intercept"
-import {promises as fs} from "node:fs"
 import type * as types from "express-tee"
+import {promises as fs} from "node:fs"
 
 type TeeOptions = types.TeeOptions
 type tee = typeof types.tee
